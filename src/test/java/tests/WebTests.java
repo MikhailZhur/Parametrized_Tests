@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import tests.data.Language;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.*;
@@ -21,12 +23,13 @@ public class WebTests {
         Configuration.pageLoadStrategy = "eager";
     }
 
-    @Test
+    @EnumSource(Language.class)
+    @ParameterizedTest
     @Tag("WEB")
     @DisplayName("Корректное отображение текста 'Тут покупают дешёвые авиабилеты' в зависимости от выбранного языка")
-    void aviasalesSiteShouldHeadDisplayCorrectText() {
+    void aviasalesSiteShouldHeadDisplayCorrectText(Language language) {
         open("https://www.aviasales.ru");
-        $("[data-test-id='page-header']").shouldHave(text("Тут покупают дешёвые авиабилеты"));
+        $("[data-test-id='page-header']").shouldHave(text(language.description));
     }
 
     @Test
@@ -38,6 +41,9 @@ public class WebTests {
         $(".s__x45k4bUHEzooiNiY").shouldHave(text("Журнал"));
         $(".s__x45k4bUHEzooiNiY").shouldHave(text("Поддержка"));
     }
+    //.find(text(Language.name()))
+
+
 
     @ParameterizedTest(name = "Для поискового запроса {0} должен выводить не пустой список")
     @ValueSource(strings = {
@@ -73,6 +79,11 @@ public class WebTests {
         open("https://www.startpage.com");
         $("#q").setValue(searchQuery).pressEnter();
         $(".wgl-title-link-container").shouldHave(text(expectedLink));
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Language.RU.description);
+        System.out.println(Language.EN.description);
     }
 
 }

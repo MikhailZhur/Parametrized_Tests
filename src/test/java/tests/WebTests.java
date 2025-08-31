@@ -14,7 +14,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import tests.data.Language;
 
 import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.files.DownloadActions.click;
 
 public class WebTests {
 
@@ -29,6 +31,14 @@ public class WebTests {
     @DisplayName("Корректное отображение текста 'Тут покупают дешёвые авиабилеты' в зависимости от выбранного языка")
     void aviasalesSiteShouldHeadDisplayCorrectText(Language language) {
         open("https://www.aviasales.ru");
+        if (language == Language.valueOf("RU")) {
+            $(".s__yGcFIRQ3jDUFsr1_").click();
+            $(".s__ORGyGV3MdPAhAdi5").click();
+        } else if (language == Language.valueOf("EN")) {
+            $(".s__yGcFIRQ3jDUFsr1_").click();
+            $("[placeholder='Поиск']").setValue("США");
+            $(".s__S0YcHz6czIgNJKOD").click();
+        }
         $("[data-test-id='page-header']").shouldHave(text(language.description));
     }
 
@@ -44,18 +54,16 @@ public class WebTests {
     //.find(text(Language.name()))
 
 
-
     @ParameterizedTest(name = "Для поискового запроса {0} должен выводить не пустой список")
     @ValueSource(strings = {
             "RestAssured", "JUnit 5"
     })
     @Tag("SMOKE")
-    void searhResultsShouldDisplayNotBeEmptyList(String searchQuery){
+    void searhResultsShouldDisplayNotBeEmptyList(String searchQuery) {
         open("https://www.startpage.com");
         $("#q").setValue(searchQuery).pressEnter();
         $$(".w-gl").shouldBe(CollectionCondition.sizeGreaterThan(0));
     }
-
 
 
     @ParameterizedTest(name = "Для поискового запроса {0} должна быть ссылка {1}")
@@ -64,18 +72,17 @@ public class WebTests {
             "JUnit 5, https://junit.org"
     })
     @Tag("SMOKE")
-    void searhResultsShouldContainExpectedUrl(String searchQuery, String expectedLink){
+    void searhResultsShouldContainExpectedUrl(String searchQuery, String expectedLink) {
         open("https://www.startpage.com");
         $("#q").setValue(searchQuery).pressEnter();
         $(".wgl-title-link-container").shouldHave(text(expectedLink));
     }
 
 
-
     @ParameterizedTest(name = "Для поискового запроса {0} должна быть ссылка {1}")
-    @CsvFileSource (resources = "/test_data/searhResultsShouldContainExpectedUrl.csv")
+    @CsvFileSource(resources = "/test_data/searhResultsShouldContainExpectedUrl.csv")
     @Tag("SMOKE")
-    void searhResultsShouldContainExpectedUrlCsvFileSource(String searchQuery, String expectedLink){
+    void searhResultsShouldContainExpectedUrlCsvFileSource(String searchQuery, String expectedLink) {
         open("https://www.startpage.com");
         $("#q").setValue(searchQuery).pressEnter();
         $(".wgl-title-link-container").shouldHave(text(expectedLink));

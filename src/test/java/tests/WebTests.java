@@ -1,58 +1,23 @@
 package tests;
 
 import com.codeborne.selenide.CollectionCondition;
-import com.codeborne.selenide.Configuration;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvFileSource;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.*;
 import tests.data.Language;
 
+import java.awt.*;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static com.codeborne.selenide.CollectionCondition.texts;
 import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Selectors.byText;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.*;
-import static com.codeborne.selenide.files.DownloadActions.click;
 
-public class WebTests {
-
-    @BeforeAll
-    static void setUp() {
-        Configuration.pageLoadStrategy = "eager";
-    }
-
-    @EnumSource(Language.class)
-    @ParameterizedTest
-    @Tag("WEB")
-    @DisplayName("Корректное отображение текста 'Тут покупают дешёвые авиабилеты' в зависимости от выбранного языка")
-    void aviasalesSiteShouldHeadDisplayCorrectText(Language language) {
-        open("https://www.aviasales.ru");
-        if (language == Language.valueOf("RU")) {
-            $(".s__yGcFIRQ3jDUFsr1_").click();
-            $(".s__ORGyGV3MdPAhAdi5").click();
-        } else if (language == Language.valueOf("EN")) {
-            $(".s__yGcFIRQ3jDUFsr1_").click();
-            $("[placeholder='Поиск']").setValue("США");
-            $(".s__S0YcHz6czIgNJKOD").click();
-        }
-        $("[data-test-id='page-header']").shouldHave(text(language.description));
-    }
-
-    @Test
-    @Tag("WEB")
-    @DisplayName("Корректное отображение текста 'Профиль, журнал, поддержка' в зависимости от выбранного языка")
-    void aviasalesSiteShouldDisplayCorrectText() {
-        open("https://www.aviasales.ru");
-        $(".s__x45k4bUHEzooiNiY").shouldHave(text("Профиль"));
-        $(".s__x45k4bUHEzooiNiY").shouldHave(text("Журнал"));
-        $(".s__x45k4bUHEzooiNiY").shouldHave(text("Поддержка"));
-    }
-    //.find(text(Language.name()))
-
+public class WebTests extends BaseTest {
 
     @ParameterizedTest(name = "Для поискового запроса {0} должен выводить не пустой список")
     @ValueSource(strings = {
@@ -88,10 +53,38 @@ public class WebTests {
         $(".wgl-title-link-container").shouldHave(text(expectedLink));
     }
 
-    public static void main(String[] args) {
-        System.out.println(Language.RU.description);
-        System.out.println(Language.EN.description);
+    @EnumSource(Language.class)
+    @ParameterizedTest
+    @Tag("WEB")
+    @DisplayName("Корректное отображение текста 'Тут покупают дешёвые авиабилеты' в зависимости от выбранного языка")
+    void aviasalesSiteShouldHeadDisplayCorrectText(Language language) {
+        open("https://www.aviasales.ru");
+        if (language == Language.valueOf("RU")) {
+            $(".s__yGcFIRQ3jDUFsr1_").click();
+            $(".s__ORGyGV3MdPAhAdi5").click();
+        } else if (language == Language.valueOf("EN")) {
+            $(".s__yGcFIRQ3jDUFsr1_").click();
+            $("[placeholder='Поиск']").setValue("США");
+            $(".s__S0YcHz6czIgNJKOD").click();
+        }
+        $("[data-test-id='page-header']").shouldHave(text(language.description));
     }
 
+
+    static Stream<Arguments> selenideSiteShouldDisplayCorrectButtons(){
+        return Stream.of(
+                Arguments.of(Language.EN, List.of("Quick start", "Docs", "FAQ", "Blog", "Javadoc", "Users", "Quotes"),
+                Arguments.of(Language.RU, List.of("С чего начать?", "Док", "ЧАВО", "Блог", "Javadoc", "Пользователи", "Отзывы")))
+        );
+    }
+
+    @MethodSource
+    @Tag("WEB")
+    @ParameterizedTest(name = "Корректное отображение кнопок в зависимости от выбранного языка")
+    void selenideSiteShouldDisplayCorrectButtons(Language language, List<String> expectedButtons) {
+        open("https://ru.selenide.org/");
+        $$("#languages a").find(text(language.name())).click();
+        $$(".main-menu-pages a").filter(visible).shouldHave(texts(expectedButtons));
+    }
 }
 

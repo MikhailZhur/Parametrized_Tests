@@ -71,14 +71,14 @@ public class WebTests extends BaseTest {
     }
 
 
-    static Stream<Arguments> selenideSiteShouldDisplayCorrectButtons(){
+    static Stream<Arguments> dataButton(){
         return Stream.of(
                 Arguments.of(Language.EN, List.of("Quick start", "Docs", "FAQ", "Blog", "Javadoc", "Users", "Quotes"),
                 Arguments.of(Language.RU, List.of("С чего начать?", "Док", "ЧАВО", "Блог", "Javadoc", "Пользователи", "Отзывы")))
         );
     }
 
-    @MethodSource
+    @MethodSource("dataButton")
     @Tag("WEB")
     @ParameterizedTest(name = "Корректное отображение кнопок в зависимости от выбранного языка")
     void selenideSiteShouldDisplayCorrectButtons(Language language, List<String> expectedButtons) {

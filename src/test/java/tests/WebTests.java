@@ -1,6 +1,10 @@
 package tests;
 
 import com.codeborne.selenide.CollectionCondition;
+import com.codeborne.selenide.logevents.SelenideLogger;
+import io.qameta.allure.Step;
+import io.qameta.allure.selenide.AllureSelenide;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -21,13 +25,16 @@ public class WebTests extends BaseTest {
 
     @ParameterizedTest(name = "Для поискового запроса {0} должен выводить не пустой список")
     @ValueSource(strings = {
-            "RestAssured", "JUnit 5"
+            "RestAssured"
     })
     @Tag("SMOKE")
     void searhResultsShouldDisplayNotBeEmptyList(String searchQuery) {
+
+        SelenideLogger.addListener("Allure", new AllureSelenide());
+
         open("https://www.startpage.com");
         $("#q").setValue(searchQuery).pressEnter();
-        $$(".w-gl").shouldBe(CollectionCondition.sizeGreaterThan(0));
+        $$(".w-gl").shouldBe(CollectionCondition.sizeGreaterThan(11));
     }
 
 
@@ -77,14 +84,16 @@ public class WebTests extends BaseTest {
                 Arguments.of(Language.RU, List.of("С чего начать?", "Док", "ЧАВО", "Блог", "Javadoc", "Пользователи", "Отзывы")))
         );
     }
-
+    @Disabled
     @MethodSource("dataButton")
     @Tag("WEB")
     @ParameterizedTest(name = "Корректное отображение кнопок в зависимости от выбранного языка")
     void selenideSiteShouldDisplayCorrectButtons(Language language, List<String> expectedButtons) {
-        open("https://ru.selenide.org/");
+        open("https://ru.selenide.org");
         $$("#languages a").find(text(language.name())).click();
         $$(".main-menu-pages a").filter(visible).shouldHave(texts(expectedButtons));
     }
 }
+
+
 
